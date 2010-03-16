@@ -1,0 +1,79 @@
+
+on init
+    export PATH /sbin:/system/bin:/system/xbin:/system/sbin:/system/xbin/bb:/data/local/bin
+    export ANDROID_ROOT /system
+    export ANDROID_DATA /data
+    export EXTERNAL_STORAGE /sdcard
+
+    symlink /system/etc /etc
+    symlink /sbin/busybox /sbin/sh
+
+    chmod 0755 /sbin/busybox
+
+    mkdir /sdcard
+    mkdir /system
+    mkdir /data
+    mkdir /cache
+    mount /tmp /tmp tmpfs
+
+on boot
+
+    ifup lo
+    hostname localhost
+    domainname localdomain
+
+    class_start default
+
+service loadkeys /sbin/loadkeys /sbin/consolemap
+	disabled
+	oneshot
+
+service dmesg /sbin/busybox dmesg -n 1
+	oneshot
+
+service recovery /sbin/recovery
+	onrestart start loadkeys
+	onrestart class_start con
+	onrestart stop recovery
+
+service start_fbcon /sbin/start_fbcon
+	oneshot
+	class con
+	
+service con1 /sbin/openvt -w -f -c 1 /sbin/vtspawn
+	class con
+
+service con2 /sbin/openvt -w -c 2 /sbin/vtspawn
+	class con
+
+service con3 /sbin/openvt -w -c 3 /sbin/vtspawn
+	class con
+
+service con4 /sbin/openvt -w -c 4 /sbin/vtspawn
+	class con
+
+service con5 /sbin/openvt -w -c 5 /sbin/vtspawn
+	class con
+
+service con6 /sbin/openvt -w -c 6 /sbin/vtspawn
+	class con
+
+service con7 /sbin/openvt -w -c 7 /sbin/vtspawn
+	class con
+
+service con8 /sbin/openvt -w -c 8 /sbin/vtspawn
+	class con
+
+service con9 /sbin/openvt -w -c 9 /sbin/vtspawn
+	class con
+
+service con10 /sbin/openvt -w -c 10 /sbin/vtspawn
+	class con
+
+service adbd /sbin/adbd recovery
+
+on property:persist.service.adb.enable=1
+    start adbd
+
+on property:persist.service.adb.enable=0
+    stop adbd
