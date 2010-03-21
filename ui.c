@@ -29,7 +29,7 @@
 #include "minui/minui.h"
 
 #define MAX_COLS 64
-#define MAX_ROWS 32
+#define MAX_ROWS 64
 
 #define CHAR_WIDTH 10
 #define CHAR_HEIGHT 18
@@ -178,6 +178,7 @@ static void draw_screen_locked(void)
         int i = 0;
         if (show_menu) {
             gr_color(120, 166, 0, 255);
+//            gr_color(61, 233, 255, 255);
             gr_fill(0, (menu_top+menu_sel) * CHAR_HEIGHT,
                     gr_fb_width(), (menu_top+menu_sel+1)*CHAR_HEIGHT+1);
 
@@ -185,7 +186,8 @@ static void draw_screen_locked(void)
                 if (i == menu_top + menu_sel) {
                     gr_color(255, 255, 255, 255);
                     draw_text_line(i, menu[i]);
-                    gr_color(120, 166, 0, 255);
+            gr_color(120, 166, 0, 255);
+//	            gr_color(61, 233, 255, 255);
                 } else {
                     draw_text_line(i, menu[i]);
                 }
