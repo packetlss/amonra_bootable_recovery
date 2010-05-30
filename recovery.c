@@ -452,7 +452,7 @@ choose_nandroid_file(const char *nandroid_folder)
             if (confirm_apply == BTN_MOUSE) {
                       
                             ui_print("\nRestoring : ");
-       		            char nandroid_command[200]="/sbin/nandroid-mobile.sh -r -e --norecovery --nomisc --nocache --nosplash1 --nosplash2 --defaultinput -s ";
+       		            char nandroid_command[200]="/sbin/nandroid-mobile.sh -r -e --norecovery --nomisc --nosplash1 --nosplash2 --defaultinput -s ";
 
 			    strlcat(nandroid_command, list[chosen_item], sizeof(nandroid_command));
 
@@ -984,7 +984,7 @@ show_menu_br()
                 case ITEM_NANDROID_BCK:
 			run_script("\nCreate Nandroid backup?",
 				   "\nPerforming backup : ",
-				   "/sbin/nandroid-mobile.sh -b --norecovery --nomisc --nocache --nosplash1 --nosplash2 --defaultinput",
+				   "/sbin/nandroid-mobile.sh -b --norecovery --nomisc --nosplash1 --nosplash2 --defaultinput",
 				   "\nuNnable to execute nandroid-mobile.sh!\n(%s)\n",
 				   "\nError : Run 'nandroid-mobile.sh' via adb!\n",
 				   "\nBackup complete!\n\n",
@@ -994,7 +994,7 @@ show_menu_br()
                 case ITEM_NANDROID_BCKEXT:
 			run_script("\nCreate Nandroid + ext backup?",
 				   "\nPerforming backup : ",
-				   "/sbin/nandroid-mobile.sh -b -e --norecovery --nomisc --nocache --nosplash1 --nosplash2 --defaultinput",
+				   "/sbin/nandroid-mobile.sh -b -e --norecovery --nomisc --nosplash1 --nosplash2 --defaultinput",
 				   "\nuNnable to execute nandroid-mobile.sh!\n(%s)\n",
 				   "\nError : Run 'nandroid-mobile.sh' via adb!\n",
 				   "\nBackup complete!\n\n",
