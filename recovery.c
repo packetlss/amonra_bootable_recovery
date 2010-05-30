@@ -452,7 +452,7 @@ choose_nandroid_file(const char *nandroid_folder)
             if (confirm_apply == KEY_DREAM_HOME) {
                       
                             ui_print("\nRestoring : ");
-       		            char nandroid_command[200]="/sbin/nandroid-mobile.sh -r -e --norecovery --nocache --nomisc --nosplash1 --nosplash2 --defaultinput -s ";
+       		            char nandroid_command[200]="/sbin/nandroid-mobile.sh -r -e --norecovery --nomisc --nosplash1 --nosplash2 --defaultinput -s ";
 
 			    strlcat(nandroid_command, list[chosen_item], sizeof(nandroid_command));
 
@@ -635,6 +635,7 @@ choose_update_file()
     DIR *dir;
     struct dirent *de;
     char **files;
+    char **list;
     int total = 0;
     int i;
 
@@ -678,6 +679,9 @@ choose_update_file()
     files = (char **) malloc((total + 1) * sizeof(*files));
     files[total] = NULL;
 
+    list = (char **) malloc((total + 1) * sizeof(*files));
+    list[total] = NULL;
+
     /* set it up for the second pass */
     rewinddir(dir);
 
@@ -691,6 +695,10 @@ choose_update_file()
             files[i] = (char *) malloc(SDCARD_PATH_LENGTH + strlen(de->d_name) + 1);
             strcpy(files[i], SDCARD_PATH);
             strcat(files[i], de->d_name);
+
+            list[i] = (char *) malloc(strlen(de->d_name) + 1);
+            strcpy(list[i], de->d_name);
+
             i++;
         }
     }
@@ -701,7 +709,7 @@ choose_update_file()
         goto out;
     }
 
-    ui_start_menu(headers, files);
+    ui_start_menu(headers, list);
     int selected = 0;
     int chosen_item = -1;
 
@@ -729,7 +737,7 @@ choose_update_file()
             ui_end_menu();
 
             ui_print("\nInstall : ");
-            ui_print(files[chosen_item]);
+            ui_print(list[chosen_item]);
 	    ui_clear_key_queue();
             ui_print(" ? \nPress HOME to confirm,");
             ui_print("\nany other key to abort.\n");
@@ -762,8 +770,10 @@ out:
 
     for (i = 0; i < total; i++) {
         free(files[i]);
+        free(list[i]);
     }
     free(files);
+    free(list);
 }
 
 
@@ -779,16 +789,18 @@ show_menu_wipe()
 
 // these constants correspond to elements of the items[] list.
 #define ITEM_WIPE_DATA     0
-#define ITEM_WIPE_DALVIK   1
-#define ITEM_WIPE_EXT      2
-#define ITEM_WIPE_BAT      3
-#define ITEM_WIPE_ROT      4
+#define ITEM_WIPE_CACHE    1
+#define ITEM_WIPE_DALVIK   2
+#define ITEM_WIPE_EXT      3
+#define ITEM_WIPE_BAT      4
+#define ITEM_WIPE_ROT      5
 
     static char* items[] = { "[Alt+0] Wipe data/factory reset",
-                             "[Alt+1] Wipe Dalvik-cache",
-                             "[Alt+2] Wipe SD:ext partition",
-                             "[Alt+3] Wipe battery stats",
-                             "[Alt+4] Wipe rotate settings",
+                             "[Alt+1] Wipe cache",
+                             "[Alt+2] Wipe Dalvik-cache",
+                             "[Alt+3] Wipe SD:ext partition",
+                             "[Alt+4] Wipe battery stats",
+                             "[Alt+5] Wipe rotate settings",
                              NULL };
 
     ui_start_menu(headers, items);
@@ -807,12 +819,14 @@ show_menu_wipe()
         } else if (alt && key == KEY_0) {
             chosen_item = ITEM_WIPE_DATA;
         } else if (alt && key == KEY_1) {
+            chosen_item = ITEM_WIPE_CACHE;
+        } else if (alt && key == KEY_2) {
             chosen_item = ITEM_WIPE_DALVIK;
         } else if (alt && key == KEY_2) {
             chosen_item = ITEM_WIPE_EXT;
-        } else if (alt && key == KEY_3) {
-            chosen_item = ITEM_WIPE_BAT;
         } else if (alt && key == KEY_4) {
+            chosen_item = ITEM_WIPE_BAT;
+        } else if (alt && key == KEY_5) {
             chosen_item = ITEM_WIPE_ROT;
         } else if ((key == KEY_DOWN || key == KEY_VOLUMEDOWN) && visible) {
             ++selected;
@@ -844,6 +858,22 @@ show_menu_wipe()
                         ui_print("\nData wipe complete.\n\n");
                     } else {
                         ui_print("\nData wipe aborted.\n\n");
+                    }
+                    if (!ui_text_visible()) return;
+                    break;
+
+                case ITEM_WIPE_CACHE:
+                    ui_clear_key_queue();
+		    ui_print("\nWipe cache");
+                    ui_print("\nPress HOME to confirm,");
+                    ui_print("\nany other key to abort.\n");
+                    int confirm_wipe_cache = ui_wait_key();
+                    if (confirm_wipe_cache == KEY_DREAM_HOME) {
+                        ui_print("\nWiping cache...\n");
+                        erase_root("CACHE:");
+                        ui_print("\nCache wipe complete.\n\n");
+                    } else {
+                        ui_print("\nCache wipe aborted.\n\n");
                     }
                     if (!ui_text_visible()) return;
                     break;
@@ -922,6 +952,8 @@ show_menu_br()
 #define ITEM_NANDROID_RES  2
 #define ITEM_BART_BCK  3
 #define ITEM_BART_RES  4
+#define ITEM_GOOG_BCK  5
+#define ITEM_GOOG_RES  6
 
 
     static char* items[] = { "[Alt+0] Nand backup",
@@ -929,6 +961,9 @@ show_menu_br()
 			     "[Alt+2] Nand restore",
 			     "[Alt+3] BART backup",
                              "[Alt+4] BART restore",
+			     "[Alt+5] Bck Google files",
+                             "[Alt+6] Res Google files",
+
                              NULL };
 
     ui_start_menu(headers, items);
@@ -954,6 +989,10 @@ show_menu_br()
             chosen_item = ITEM_BART_BCK;
         } else if (alt && key == KEY_4) {
             chosen_item = ITEM_BART_RES;
+        } else if (alt && key == KEY_5) {
+            chosen_item = ITEM_GOOG_BCK;
+        } else if (alt && key == KEY_6) {
+            chosen_item = ITEM_GOOG_RES;
         } else if ((key == KEY_DOWN || key == KEY_VOLUMEDOWN) && visible) {
             ++selected;
             selected = ui_menu_select(selected);
@@ -974,7 +1013,7 @@ show_menu_br()
                 case ITEM_NANDROID_BCK:
 			run_script("\nCreate Nandroid backup?",
 				   "\nPerforming backup : ",
-				   "/sbin/nandroid-mobile.sh -b --norecovery --nocache --nomisc --nosplash1 --nosplash2 --defaultinput",
+				   "/sbin/nandroid-mobile.sh -b --norecovery --nomisc --nosplash1 --nosplash2 --defaultinput",
 				   "\nuNnable to execute nandroid-mobile.sh!\n(%s)\n",
 				   "\nError : Run nandroid-mobile.sh via console!\n",
 				   "\nBackup complete!\n\n",
@@ -984,7 +1023,7 @@ show_menu_br()
                 case ITEM_NANDROID_BCKEXT:
 			run_script("\nCreate Nandroid + ext backup?",
 				   "\nPerforming backup : ",
-				   "/sbin/nandroid-mobile.sh -b -e --norecovery --nocache --nomisc --nosplash1 --nosplash2 --defaultinput",
+				   "/sbin/nandroid-mobile.sh -b -e --norecovery --nomisc --nosplash1 --nosplash2 --defaultinput",
 				   "\nuNnable to execute nandroid-mobile.sh!\n(%s)\n",
 				   "\nError : Run nandroid-mobile.sh via console!\n",
 				   "\nBackup complete!\n\n",
@@ -1016,7 +1055,25 @@ show_menu_br()
 				   "\nRestore aborted!\n\n");
 			break;
 
+                case ITEM_GOOG_BCK:
+			run_script("\nBackup Google proprietary system files?",
+				   "\nPerforming backup : ",
+				   "/sbin/backuptool.sh backup",
+				   "\nuNnable to execute backuptool.sh!\n(%s)\n",
+				   "\nError : Run 'backuptools.sh' via adb!\n",
+				   "\nBackup complete!\n\n",
+				   "\nBackup aborted!\n\n");
+			break;
 
+                case ITEM_GOOG_RES:
+			run_script("\nRestore Google proprietary system files?",
+				   "\nPerforming restore : ",
+				   "/sbin/backuptool.sh restore",
+				   "\nuNnable to execute backuptool.sh!\n(%s)\n",
+				   "\nError : Run 'backuptools.sh' via adb!\n",
+				   "\nRestore complete!\n\n",
+				   "\nRestore aborted!\n\n");
+			break;
              
             }
 
@@ -1114,6 +1171,7 @@ show_menu_partition()
 						ui_print("\rSwap-size  = %s MB",swapsize);
         	                        	int key = ui_wait_key();
 						if (key == KEY_DREAM_HOME) {
+							ui_clear_key_queue();
 							if (swap==0){
 								ui_print("\rSwap-size  = %s MB : NONE\n",swapsize);
 							} else {
@@ -1227,12 +1285,10 @@ show_menu_other()
 
 // these constants correspond to elements of the items[] list.
 #define ITEM_OTHER_FIXUID 0
-#define ITEM_OTHER_AP2SD  1
-#define ITEM_OTHER_RE2SD  2
+#define ITEM_OTHER_RE2SD  1
 
     static char* items[] = { "[Alt+0] Fix apk uid mismatches",
-			     "[Alt+1] Move apps+dalv to SD",
-			     "[Alt+2] Move recovery.log to SD",
+			     "[Alt+1] Move recovery.log to SD",
                              NULL };
 
     ui_start_menu(headers, items);
@@ -1251,8 +1307,6 @@ show_menu_other()
         } else if (alt && key == KEY_0) {
             chosen_item = ITEM_OTHER_FIXUID;
         } else if (alt && key == KEY_1) {
-            chosen_item = ITEM_OTHER_AP2SD;
-        }  else if (alt && key == KEY_2) {
             chosen_item = ITEM_OTHER_RE2SD;
         } else if ((key == KEY_DOWN || key == KEY_VOLUMEDOWN) && visible) {
             ++selected;
@@ -1279,16 +1333,6 @@ show_menu_other()
 				   "\nError : Run fix_permissions via console!\n\n",
 				   "\nUid mismatches fixed!\n\n",
 				   "\nFixing aborted!\n\n");
-			break;
-                   
-		case ITEM_OTHER_AP2SD:
-			run_script("\nMove apps and dalvik-cache to SD",
-				   "\nMoving : ",
-				   "/sbin/apps2sd",
-				   "\nUnable to execute apps2sd!\n(%s)\n",
-				   "\nError : Run 'apps2sd' via console!\n\n",
-				   "\nMoving complete!\n\n",
-				   "\nMoving aborted!\n\n");
 			break;
 
 		case ITEM_OTHER_RE2SD:

@@ -183,9 +183,9 @@ static void draw_screen_locked(void)
 
             for (; i < menu_top + menu_items; ++i) {
                 if (i == menu_top + menu_sel) {
-	            gr_color(255, 255, 255, 255);
+                    gr_color(255, 255, 255, 255);
                     draw_text_line(i, menu[i]);
-		    gr_color(120, 166, 0, 255);
+	            gr_color(120, 166, 0, 255);
                 } else {
                     draw_text_line(i, menu[i]);
                 }
